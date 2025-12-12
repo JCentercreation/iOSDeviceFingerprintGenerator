@@ -11,8 +11,17 @@ import Network
 #if canImport(AppTrackingTransparency)
 import AppTrackingTransparency
 #endif
-#if canImport(CryptoKit)
+#if os(iOS)
 import CryptoKit
+typealias FingerprintSHA256 = CryptoKit.SHA256
+#else
+/// When CryptoKit is not available (e.g. DocC/macOS build), provide a dummy stand‑in.
+enum FingerprintSHA256 {
+    struct Digest: Sequence {
+        func makeIterator() -> Array<UInt8>.Iterator { [].makeIterator() }
+    }
+    static func hash(data: Data) -> Digest { Digest() }
+}
 #endif
 
 @available(iOS 15.0.0, *)
@@ -81,7 +90,6 @@ public actor iOSDeviceFingerprintGenerator {
     
 }
 
-#if os(iOS)
 @available(iOS 15.0.0, *)
 private extension iOSDeviceFingerprintGenerator {
     
@@ -133,25 +141,35 @@ private extension iOSDeviceFingerprintGenerator {
         }
 
         let inputData = Data(combinedData.utf8)
-        let hashed = SHA256.hash(data: inputData)
+        let hashed = FingerprintSHA256.hash(data: inputData)
         return hashed.compactMap { String(format: "%02x", $0) }.joined()
     }
     
     func collectHardwareSignals() async -> [String: Any] {
-            var signals: [String: Any] = [:]
+        var signals: [String: Any] = [:]
 
         signals["model"] = getDeviceModel()
+#if canImport(UIKit)
         signals["systemVersion"] = await UIDevice.current.systemVersion
         signals["screenResolution"] = await getScreenResolution()
-        signals["totalDiskSpace"] = getTotalDiskSpace()
-        signals["availableDiskSpace"] = getAvailableDiskSpace()
         signals["batteryLevel"] = await UIDevice.current.batteryLevel
         signals["batteryState"] = await UIDevice.current.batteryState.rawValue
+#endif
+        signals["totalDiskSpace"] = getTotalDiskSpace()
+        signals["availableDiskSpace"] = getAvailableDiskSpace()
         signals["processorCount"] = ProcessInfo.processInfo.processorCount
         signals["physicalMemory"] = ProcessInfo.processInfo.physicalMemory
         signals["systemUptime"] = ProcessInfo.processInfo.systemUptime
         signals["thermalState"] = ProcessInfo.processInfo.thermalState.rawValue
-        signals["lowPowerModeEnabled"] = ProcessInfo.processInfo.isLowPowerModeEnabled
+#if os(iOS)
+        if #available(iOS 9.0, *) {
+            signals["lowPowerModeEnabled"] = ProcessInfo.processInfo.isLowPowerModeEnabled
+        } else {
+            signals["lowPowerModeEnabled"] = false
+        }
+#else
+        signals["lowPowerModeEnabled"] = false
+#endif
 
         return signals
     }
@@ -163,11 +181,23 @@ private extension iOSDeviceFingerprintGenerator {
         signals["locale"] = Locale.current.identifier
         signals["preferredLanguages"] = Locale.preferredLanguages
         signals["calendar"] = Calendar.current.identifier
-        signals["keyboardLanguages"] = await MainActor.run { UITextInputMode.activeInputModes.map { $0.primaryLanguage ?? "" } }
-        let status = ATTrackingManager.trackingAuthorizationStatus
-        let trackingAllowed = (status == .authorized)
-        signals["isAdvertisingTrackingEnabled"] = trackingAllowed
+#if canImport(UIKit)
+        signals["keyboardLanguages"] = await MainActor.run {
+            UITextInputMode.activeInputModes.map { $0.primaryLanguage ?? "" }
+        }
         signals["vendorID"] = await UIDevice.current.identifierForVendor?.uuidString ?? ""
+#endif
+#if canImport(AppTrackingTransparency)
+        if #available(iOS 14.0, macOS 11.0, *) {
+            let status = ATTrackingManager.trackingAuthorizationStatus
+            let trackingAllowed = (status == .authorized)
+            signals["isAdvertisingTrackingEnabled"] = trackingAllowed
+        } else {
+            signals["isAdvertisingTrackingEnabled"] = false
+        }
+#else
+        signals["isAdvertisingTrackingEnabled"] = false
+#endif
         signals["networkType"] = await getCurrentNetworkType()
         signals["vpnConnected"] = isVPNConnected()
         signals["proxyConfigured"] = isProxyConfigured()
@@ -185,7 +215,8 @@ private extension iOSDeviceFingerprintGenerator {
         }
         return identifier
     }
-    
+
+#if canImport(UIKit)
     @MainActor
     func getScreenResolution() -> String {
         let screen = UIScreen.main
@@ -193,7 +224,8 @@ private extension iOSDeviceFingerprintGenerator {
         let scale = screen.scale
         return "\(Int(bounds.width * scale))x\(Int(bounds.height * scale))"
     }
-    
+#endif
+
     nonisolated func getTotalDiskSpace() -> Int64 {
         do {
             let attributes = try FileManager.default.attributesOfFileSystem(
@@ -215,27 +247,39 @@ private extension iOSDeviceFingerprintGenerator {
             return 0
         }
     }
-    
+
+    // Siempre disponible, con fallback seguro en plataformas sin Network o en macOS antiguo
     nonisolated func getCurrentNetworkType() async -> String {
-        return await withCheckedContinuation { continuation in
-            let monitor = NWPathMonitor()
-            let queue = DispatchQueue.global(qos: .background)
-            
-            monitor.pathUpdateHandler = { path in
-                if path.usesInterfaceType(.wifi) {
-                    continuation.resume(returning: "WiFi")
-                } else if path.usesInterfaceType(.cellular) {
-                    continuation.resume(returning: "Cellular")
-                } else {
-                    continuation.resume(returning: "Other")
+#if os(iOS) && canImport(Network)
+        if #available(iOS 12.0, macOS 10.14, *) {
+            return await withCheckedContinuation { (continuation: CheckedContinuation<String, Never>) in
+                let monitor = NWPathMonitor()
+                let queue = DispatchQueue.global(qos: .background)
+                
+                monitor.pathUpdateHandler = { path in
+                    let result: String
+                    if path.usesInterfaceType(.wifi) {
+                        result = "WiFi"
+                    } else if path.usesInterfaceType(.cellular) {
+                        result = "Cellular"
+                    } else {
+                        result = "Other"
+                    }
+                    
+                    continuation.resume(returning: result)
+                    monitor.cancel()
                 }
-                monitor.cancel()
+                
+                monitor.start(queue: queue)
             }
-            
-            monitor.start(queue: queue)
+        } else {
+            return "Other"
         }
+#else
+        return "Other"
+#endif
     }
-    
+
     nonisolated func isVPNConnected() -> Bool {
         let vpnInterfaces = Set(["utun", "tap", "tun", "ppp", "ipsec", "pdp_ip"])
             
@@ -298,6 +342,4 @@ private extension iOSDeviceFingerprintGenerator {
 
         return min(confidenceLevel, 1.0)
     }
-    
 }
-#endif
