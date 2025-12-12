@@ -62,8 +62,7 @@ print(“DeviceID: fingerprint.riskConfidenceLevel, format: .percent)”) prin
 
 ### Full Signal Inspection
 ```swift
-et fingerprint = await iOSDeviceFingerprintGenerator.shared.generateDeviceFingerprint()
-// Hardware signals
+let fingerprint = await iOSDeviceFingerprintGenerator.shared.generateDeviceFingerprint()
 print(“Model: fingerprint.hardwareSignals“screenResolution” ?? “N/A”)”)
  print(“Free disk: fingerprint.behaviourSignals“networkType” ?? “N/A”)”)
 print(“VPN: fingerprint.behaviourSignals“isAdvertisingTrackingEnabled” as? Bool ?? false)”)
@@ -108,11 +107,10 @@ print(“VPN: fingerprint.behaviourSignals“isAdvertisingTrackingEnabled” as?
 ### FingerprintInfo Structure
 ```swift
 public struct FingerprintInfo {
- public let deviceID: String
-// SHA256 of sorted signals
-public let hardwareSignals: String: Any
-public let behaviourSignals: String: Any
-public let riskConfidenceLevel: Float // 0.0-1.0
+   public let deviceID: String
+  public let hardwareSignals: String: Any
+  public let behaviourSignals: String: Any
+  public let riskConfidenceLevel: Float // 0.0-1.0
 }
 ```
 
