@@ -81,6 +81,7 @@ public actor iOSDeviceFingerprintGenerator {
     
 }
 
+#if os(iOS)
 @available(iOS 15.0.0, *)
 private extension iOSDeviceFingerprintGenerator {
     
@@ -299,3 +300,4 @@ private extension iOSDeviceFingerprintGenerator {
     }
     
 }
+#endif
