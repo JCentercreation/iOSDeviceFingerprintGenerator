@@ -15,7 +15,7 @@ Production-grade iOS device fingerprinting library. Generates persistent, unique
 
 ## Documentation
 
-Find full documentation [here](https://javiercarrillogallego.github.io/iOSDeviceFingerprintGenerator/documentation/iosdevicefingerprintgenerator/)
+Find full documentation [here](https://jcentercreation.github.io/iOSDeviceFingerprintGenerator/documentation/iosdevicefingerprintgenerator/)
 
 ## Overview
 
