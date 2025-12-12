@@ -123,9 +123,9 @@ public struct FingerprintInfo {
 🔒 **Actor-isolated**: Thread-safe execution  
 
 ## Performance
-Cold start:   120-180ms (Keychain + signals + SHA256)
-Cached hit:    8-12ms  (Keychain read only)
-Network wait: +50-100ms (NWPathMonitor)
+- Cold start:   120-180ms (Keychain + signals + SHA256)
+- Cached hit:    8-12ms  (Keychain read only)
+- Network wait: +50-100ms (NWPathMonitor)
 
 ## Limitations
 
