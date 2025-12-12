@@ -174,7 +174,7 @@ private extension iOSDeviceFingerprintGenerator {
         return signals
     }
     
-    func getDeviceModel() -> String {
+    nonisolated func getDeviceModel() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -193,7 +193,7 @@ private extension iOSDeviceFingerprintGenerator {
         return "\(Int(bounds.width * scale))x\(Int(bounds.height * scale))"
     }
     
-    func getTotalDiskSpace() -> Int64 {
+    nonisolated func getTotalDiskSpace() -> Int64 {
         do {
             let attributes = try FileManager.default.attributesOfFileSystem(
                 forPath: NSHomeDirectory()
@@ -204,7 +204,7 @@ private extension iOSDeviceFingerprintGenerator {
         }
     }
     
-    func getAvailableDiskSpace() -> Int64 {
+    nonisolated func getAvailableDiskSpace() -> Int64 {
         do {
             let attributes = try FileManager.default.attributesOfFileSystem(
                 forPath: NSHomeDirectory()
@@ -215,7 +215,7 @@ private extension iOSDeviceFingerprintGenerator {
         }
     }
     
-    func getCurrentNetworkType() async -> String {
+    nonisolated func getCurrentNetworkType() async -> String {
         return await withCheckedContinuation { continuation in
             let monitor = NWPathMonitor()
             let queue = DispatchQueue.global(qos: .background)
@@ -235,7 +235,7 @@ private extension iOSDeviceFingerprintGenerator {
         }
     }
     
-    func isVPNConnected() -> Bool {
+    nonisolated func isVPNConnected() -> Bool {
         let vpnInterfaces = Set(["utun", "tap", "tun", "ppp", "ipsec", "pdp_ip"])
             
         guard let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any],
@@ -250,7 +250,7 @@ private extension iOSDeviceFingerprintGenerator {
         }
     }
     
-    func isProxyConfigured() -> Bool {
+    nonisolated func isProxyConfigured() -> Bool {
         guard let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any] else {
             return false
         }
@@ -272,7 +272,7 @@ private extension iOSDeviceFingerprintGenerator {
         return false
     }
     
-    func isEmulator() -> Bool {
+    nonisolated func isEmulator() -> Bool {
 #if targetEnvironment(simulator)
         return true
 #else
