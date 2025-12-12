@@ -56,16 +56,30 @@ dependencies:  .package(url: “https://github.com/JCentercreation/iOSDeviceFi
 ### Basic Fingerprinting
 ```swift
 import iOSDeviceFingerprintGenerator
+
 let fingerprint = await iOSDeviceFingerprintGenerator.shared.generateDeviceFingerprint()
-print(“DeviceID: fingerprint.riskConfidenceLevel, format: .percent)”) print(“Hardware: fingerprint.behaviourSignals.count) signals”)
+
+print("""
+📱 Device Fingerprint Report
+═══════════════════════════════
+ID: \(fingerprint.deviceID)
+Risk: \(fingerprint.riskConfidenceLevel, format: .percent)
+Hardware signals: \(fingerprint.hardwareSignals.count)
+Behavioral signals: \(fingerprint.behaviourSignals.count)
+═══════════════════════════════
+""")
 ```
 
-### Full Signal Inspection
+### Signal Inspection
 ```swift
 let fingerprint = await iOSDeviceFingerprintGenerator.shared.generateDeviceFingerprint()
-print(“Model: fingerprint.hardwareSignals“screenResolution” ?? “N/A”)”)
- print(“Free disk: fingerprint.behaviourSignals“networkType” ?? “N/A”)”)
-print(“VPN: fingerprint.behaviourSignals“isAdvertisingTrackingEnabled” as? Bool ?? false)”)
+
+print("Model: \(fingerprint.hardwareSignals["model"] as? String ?? "N/A")")
+print("Resolution: \(fingerprint.hardwareSignals["screenResolution"] as? String ?? "N/A")")
+print("Free disk: \((fingerprint.hardwareSignals["availableDiskSpace"] as? Int64 ?? 0) / 1024 / 1024) MB")
+print("Network: \(fingerprint.behaviourSignals["networkType"] as? String ?? "N/A")")
+print("VPN: \(fingerprint.behaviourSignals["vpnConnected"] as? Bool ?? false)")
+print("ATT: \(fingerprint.behaviourSignals["isAdvertisingTrackingEnabled"] as? Bool ?? false)")
 ```
 
 ## Signals Collected
