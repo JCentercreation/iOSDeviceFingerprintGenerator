@@ -1,7 +1,7 @@
 //
 //  FingerprintInfo.swift
 //  iOSDeviceFingerprintGenerator
-
+#if os(iOS)
 import Foundation
 
 /// A value type that encapsulates the full result of a device fingerprint evaluation.
@@ -75,3 +75,5 @@ public struct FingerprintInfo {
     /// for example to trigger step‑up authentication or additional validation.
     public let riskConfidenceLevel: Float
 }
+
+#endif
