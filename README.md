@@ -42,13 +42,13 @@ Key features include:
 
 Add to `Package.swift`:
 ```swift
-dependencies:  .package(url: “https://github.com/javiercarrillogallego/iOSDeviceFingerprintGenerator.git”, from: “1.0.0”)
+dependencies:  .package(url: “https://github.com/JCentercreation/iOSDeviceFingerprintGenerator.git”, from: “1.0.0”)
 ```
 
 ### Xcode
 
 1. File → Add Package Dependencies
-2. Enter package URL: `https://github.com/javiercarrillogallego/iOSDeviceFingerprintGenerator.git`
+2. Enter package URL: `https://github.com/JCentercreation/iOSDeviceFingerprintGenerator.git`
 3. Select version rule: "Up to Next Major Version"
 
 ## Usage
@@ -138,7 +138,7 @@ Network wait: +50-100ms (NWPathMonitor)
 
 ## License
 
-MIT License © 2025 Javier Carrillo Gallego
+MIT License © 2025 Javier Carrillo
 
 <div align="center">
 
