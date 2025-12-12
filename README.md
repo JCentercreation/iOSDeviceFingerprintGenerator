@@ -76,13 +76,15 @@ print(“VPN: fingerprint.behaviourSignals“isAdvertisingTrackingEnabled” as?
 | model | `utsname()` |
 | systemVersion | `UIDevice` |
 | screenResolution | `UIScreen` |
-| batteryLevel/State | `UIDevice` |
-| diskSpace (total/available) | `FileManager` |
+| batteryLevel | `UIDevice` |
+| batteryState | `UIDevice` |
+| availableDiskSpace | `FileManager` |
+| totalDiskSpace | `FileManager` |
 | processorCount | `ProcessInfo` |
 | physicalMemory | `ProcessInfo` |
 | systemUptime | `ProcessInfo` |
 | thermalState | `ProcessInfo` |
-| lowPowerMode | `ProcessInfo` |
+| lowPowerModeEnabled | `ProcessInfo` |
 
 ### Behavioral (13 signals)
 | Signal | Source |
@@ -92,7 +94,7 @@ print(“VPN: fingerprint.behaviourSignals“isAdvertisingTrackingEnabled” as?
 | calendar | `Calendar` |
 | keyboardLanguages | `UITextInputMode` |
 | vendorID | `UIDevice` |
-| trackingStatus | `ATTrackingManager` |
+| isAdvertisingTrackingEnabled | `ATTrackingManager` |
 | networkType | `NWPathMonitor` |
 | vpnConnected | `CFNetworkCopySystemProxySettings` |
 | proxyConfigured | `CFNetworkCopySystemProxySettings` |
