@@ -1,6 +1,5 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
-#if os(iOS)
 
 import Foundation
 #if canImport(UIKit)
@@ -300,5 +299,3 @@ private extension iOSDeviceFingerprintGenerator {
     }
     
 }
-
-#endif
